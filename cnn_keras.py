@@ -5,6 +5,8 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
 from keras import backend as K
+import matplotlib.pyplot as plt
+
 # load mnist data
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -16,8 +18,17 @@ epochs of learning
 batch_size = 100
 number_of_classes = 10
 epochs = 5
+seed = 5
+mean = 0
+stddev = 0.05
+eta = 0.01
+
 #weights
-kernel_initializer = keras.initializers.RandomUniform(minval=-0.05, maxval=0.05, seed=2)
+kernel_initializer = keras.initializers.RandomNormal(mean = mean,
+													 stddev = stddev,
+													 seed = seed) 
+
+optimizer = keras.optimizers.SGD(lr = eta, nesterov = True)
 
 #each image is 28x28 pixels
 rows, columns = 28, 28
@@ -52,31 +63,12 @@ model.add(Conv2D(filters = 32,
 	kernel_size = (5,5), 
 	activation = 'relu', 
 	input_shape = input_shape,
-	padding = 'same'))
-model.add(Conv2D(filters = 32, 
-	kernel_size = (5,5), 
-	activation = 'relu', 
-	input_shape = input_shape,
+	kernel_initializer = kernel_initializer,
 	padding = 'same'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.25))
-
-#commenting out the second set of layers because it was too much for my pc lol
-"""model.add(Conv2D(filters = 64, 
-	kernel_size = (5,5), 
-	activation = 'relu', 
-	input_shape = input_shape,
-	padding = 'same'))
-model.add(Conv2D(filters = 64, 
-	kernel_size = (5,5), 
-	activation = 'relu', 
-	input_shape = input_shape,
-	padding = 'same'))
-model.add(MaxPooling2D(pool_size=(2,2), strides=(2,2)))
-model.add(Dropout(0.25))"""
-
 model.add(Flatten())
-model.add(Dense(256, activation='relu'))
+model.add(Dense(200, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(number_of_classes, activation='softmax'))
 
@@ -84,7 +76,7 @@ model.compile(loss=keras.losses.categorical_crossentropy,
 				optimizer=keras.optimizers.Adadelta(),
 				metrics=['accuracy'])
 
-model.fit(x_train, y_train, 
+history = model.fit(x_train, y_train, 
 	batch_size=batch_size, 
 	epochs=epochs, 
 	verbose=1, 
@@ -94,3 +86,21 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print("Test loss: ", score[0])
 print("Accuracy: ", score[1])
 
+# plotting data for accuracy
+plt.figure(1)
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Accuracy(epoch)')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+
+# plot the data for loss
+plt.figure(2)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Loss(epoch)')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
