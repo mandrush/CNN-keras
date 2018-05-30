@@ -4,6 +4,7 @@ from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, AveragePooling2D
+from keras import regularizers
 from keras import backend as K
 import matplotlib.pyplot as plt
 
@@ -15,13 +16,14 @@ training batch size
 how many possible outputs (10 available digits)
 epochs of learning
 """
-batch_size = 100
+batch_size = 10
 number_of_classes = 10
-epochs = 5
+epochs = 60
 seed = 5
 mean = 0
 stddev = 0.05
-eta = 0.01
+eta = 0.03
+lambda_l2 = 0.01
 
 #weights
 kernel_initializer = keras.initializers.RandomNormal(mean = mean,
@@ -57,8 +59,6 @@ y_test = keras.utils.to_categorical(y_test, number_of_classes)
 
 model = Sequential()
 
-#in -> conv2d (32) -> conv2d(32) -> maxpool2d(2) -> dropout -> conv2d(64) -> conv2d(64) -> maxpool2d(2) -> dropout
-# -> flatten (just to convert to 1D) -> two classifiers -> output
 model.add(Conv2D(filters = 32, 
 	kernel_size = (5,5), 
 	activation = 'relu', 
@@ -68,12 +68,14 @@ model.add(Conv2D(filters = 32,
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.25))
 model.add(Flatten())
-model.add(Dense(200, activation='relu'))
+model.add(Dense(100, 
+	activation='relu',
+	kernel_regularizer=regularizers.l2(lambda_l2)))
 model.add(Dropout(0.5))
 model.add(Dense(number_of_classes, activation='softmax'))
 
 model.compile(loss=keras.losses.categorical_crossentropy,
-				optimizer=keras.optimizers.Adadelta(),
+				optimizer=optimizer,
 				metrics=['accuracy'])
 
 history = model.fit(x_train, y_train, 
