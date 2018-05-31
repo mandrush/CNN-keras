@@ -18,15 +18,15 @@ epochs of learning
 """
 batch_size = 10
 number_of_classes = 10
-epochs = 60
-seed = 5
+epochs = 40
+seed = None
 mean = 0
 stddev = 0.05
 eta = 0.03
 lambda_l2 = 0.01
 
 #weights
-kernel_initializer = keras.initializers.RandomNormal(mean = mean,
+kernel_initializer = keras.initializers.TruncatedNormal(mean = mean,
 													 stddev = stddev,
 													 seed = seed) 
 
@@ -63,6 +63,13 @@ model.add(Conv2D(filters = 32,
 	kernel_size = (5,5), 
 	activation = 'relu', 
 	input_shape = input_shape,
+	kernel_initializer = kernel_initializer,
+	padding = 'same'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Conv2D(filters = 40, 
+	kernel_size = (5,5), 
+	activation = 'relu', 
+	input_shape = (1, 12, 12),
 	kernel_initializer = kernel_initializer,
 	padding = 'same'))
 model.add(MaxPooling2D(pool_size=(2,2)))
@@ -106,3 +113,7 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+print("learning rate: ", eta)
+print("batch size: ", batch_size)
+print("lambda l2: ", lambda_l2)
+print(model.summary())
