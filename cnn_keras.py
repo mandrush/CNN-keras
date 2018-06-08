@@ -18,7 +18,7 @@ epochs of learning
 """
 batch_size = 10
 number_of_classes = 10
-epochs = 40
+epochs = 1
 seed = None
 mean = 0
 stddev = 0.05
@@ -117,3 +117,11 @@ print("learning rate: ", eta)
 print("batch size: ", batch_size)
 print("lambda l2: ", lambda_l2)
 print(model.summary())
+
+#save model to json file
+json_model = model.to_json()
+with open("model.json", "w") as file:
+	file.write(json_model)
+# save weights
+model.save_weights("model.h5")
+print("model saved")
