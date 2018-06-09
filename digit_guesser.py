@@ -41,7 +41,7 @@ def load_image():
 	
 	# compile the model
 	model.compile(loss = "binary_crossentropy",
-				 	optimizer = keras.optimizers.SGD(lr = 0.03, nesterov = True),#"rmsprop"
+				 	optimizer = "rmsprop",
 				 	metrics = ["accuracy"])
 
 	# test the image
