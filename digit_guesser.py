@@ -17,37 +17,6 @@ root = tk.Tk()
 panel = tk.Label(root)
 panel.pack()
 
-"""
-class MyDialog:
-	def __init__(self, parent):
-		font = "Consolas 18 bold"
-		top = self.top = Toplevel(parent)
-		Label(top, text="Path to image:", font = font).pack()
-		self.e = Entry(top, font = font)
-		self.e.pack(padx=5)
-
-		b = Button(top, text="OK", command=self.ok)
-		b.pack(pady=5)
-
-	def ok(self):
-		path_to_img = self.e.get()
-		print(path_to_img)
-		try:
-			image = PhotoImage(file = path_to_img)
-		except:
-			raise Exception("Wrong path!")
-
-		display_image = image.zoom(13, 13)
-		panel = tk.Label(root)
-		panel.grid(row = 1, column = 0)
-		panel.configure(image = display_image)
-		panel.image = image
-		#panel.configure(image = display_image)
-		time.sleep(0.1)
-		root.update()
-		self.top.destroy()
-		"""
-
 def load_image():
 	### display the image
 	imagefile = filedialog.askopenfile(parent = root, mode = "rb", title = "Choose an image!")
@@ -86,6 +55,7 @@ def load_image():
 	## PREDICT!!
 	classes = model.predict_classes(vect, batch_size = 10)
 	print(classes)
+	messagebox.showinfo("Guess", "This is a " + str(classes[0]))
 
 
 
