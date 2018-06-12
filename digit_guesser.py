@@ -8,10 +8,15 @@ from tkinter import *
 import time
 from tkinter import filedialog
 from keras.models import model_from_json
+from scipy.misc import imread, imresize
+import tensorflow as tf
+import base64
 
 
 # image size
 rows, columns = 28, 28
+global encoded, img
+
 
 root = tk.Tk()
 panel = tk.Label(root)
@@ -25,37 +30,41 @@ def load_image():
 	display_image = display_image.zoom(12, 12)
 	panel.configure(image = display_image)
 	panel.image = display_image
-
 	### use the image in keras
-	img = image.load_img(path_to_img, target_size = (rows, columns), grayscale = True)
-	print(img.size)
+	with open(path_to_img, "rb") as png_image:
+		encoded = base64.b64encode(png_image.read())
+
+	with open(path_to_img, "wb") as png_image:
+		png_image.write(base64.b64decode(encoded))
+
+	print(encoded)
+	img = imread(path_to_img, mode = "L")
 
 	### load the network architecture from json file
-	json_file = open("model.json", "r")
+	json_file = open("model_json", "r")
 	json_model = json_file.read()
 	json_file.close()
 	model = model_from_json(json_model)
 	### load the weights
 	model.load_weights("model.h5")
 	print("Successfully loaded model") 
+	graph = tf.get_default_graph()
 	
 	# compile the model
-	model.compile(loss = "binary_crossentropy",
-				 	optimizer = "rmsprop",
+	model.compile(loss = "categorical_crossentropy",
+				 	optimizer = "adam",
 				 	metrics = ["accuracy"])
 
-	# test the image
-	test = image.img_to_array(img)
-	test = np.expand_dims(test, axis = 0)
-	# normalize the image from [0,255] to [0,1] pixel gray level
-	test /= 255
-	vect = np.vstack([test])
+	# make the image suitable for the model
+	img = imresize(img, (rows, columns))
+	img = img.reshape(1, 28, 28, 1)
+	with graph.as_default():
+		out = model.predict(img)
+		print(out)
+		print(np.argmax(out, axis = 1))
+		guess = np.argmax(out, axis = 1)
 
-
-	## PREDICT!!
-	classes = model.predict_classes(vect, batch_size = 10)
-	print(classes)
-	messagebox.showinfo("Guess", "This is a " + str(classes[0]))
+	messagebox.showinfo("Guess", "This is a " + str(guess[0]))
 
 
 
